@@ -1,5 +1,5 @@
 # Renaissance_AI
-Java application that seeks to generate an artificial Shakespeare script. Uses N-Gram language training model.
+Java applet that seeks to generate an artificial Shakespeare script. Uses N-Gram language training model.
 
 dpdownie@wisc.edu
 
