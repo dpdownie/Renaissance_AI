@@ -1,6 +1,6 @@
 # Renaissance_AI
 Java applet that seeks to generate an artificial Shakespeare script. Uses N-Gram language training model.
 
-dpdownie@wisc.edu
+https://docs.google.com/document/d/1zRAzTDn3ml1od-0YY0Cxb6ICHO_fqUid1mHIt17HdOA/edit?usp=sharing
 
-![Image of Shakespeare](https://lh3.googleusercontent.com/proxy/Row6TQ5vcB2Yg9QWE2P6a3_IV_QQw1TrHJfR6meVHVXenkluXCN9SgF3Ewv_XKmg6CP_LFa4Ywoj2Odu)
+dpdownie@wisc.edu
