@@ -9,5 +9,6 @@ N-gram language model; alphabet of English words separated by their syllable cou
 ### Stretch Goals
 Ability to choose output method, i.e. Sonnet, Prose, Play. Rhyme training (possibly implemented with GraphADT). Other training sets for additional Renaissance Poets. 
 
+Shakespeare's works as text copied from http://shakespeare.mit.edu/
 
 Contact: dpdownie@wisc.edu
