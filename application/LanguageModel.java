@@ -32,7 +32,7 @@ public class LanguageModel {
 
   public LanguageModel() {
     try {
-      this.updateAlphabet("application/common_words.txt");
+      this.updateAlphabet("texts/common_words.txt");
     } catch (FileNotFoundException e) {
       System.out.println("File not found, alphabet not initialized.");
       e.printStackTrace();
