@@ -1,5 +1,6 @@
 /**
- * Author: Drew Downie (dpdownie@wisc.edu) Date: 10/22/2000
+ * Author: Drew Downie (dpdownie@wisc.edu)
+ * Last Updated: 10/23/2000
  */
 package application;
 
@@ -16,8 +17,8 @@ import java.util.LinkedList;
  */
 public class Word {
 
-  private ArrayList<Character> vowels = new ArrayList<Character>(Arrays.asList('a', 'e', 'i', 'o',
-      'u'));
+  private static final ArrayList<Character> vowels = new ArrayList<Character>(Arrays.asList('a',
+      'e', 'i', 'o', 'u'));
   private String word;
   private int length;
   private int syllables;
@@ -31,89 +32,111 @@ public class Word {
   public Word(String word) {
     this.word = word.toLowerCase().trim();
     this.length = word.length();
-    this.syllables = getSyllables();
+    this.syllables = calcSyllables();
+  }
+  
+  public int getLength() {
+    return length;
+  }
+
+  public int getSyllables() {
+    return syllables;
+  }
+
+  /**
+   * containsVowel():
+   * Private method that checks if a String contains a vowel.
+   * 
+   * @param in - input String
+   * @return true if input contains a vowel (aeiouy), false otherwise
+   */
+  private boolean containsVowel(String in) {
+    for (char c : in.toCharArray()) {
+      if (vowels.contains(c)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
    * getSyllables():
    * Public method that returns the number of syllables in a given word.
    * This method is not entirely comprehensive due to the irregularities of the English language.
-   * It is designed to recognize commonly occurring patterns, and should classify many words
-   * correctly.
+   * It is designed to recognize commonly occurring patterns, and should therefore classify many
+   * words correctly, but not all.
    * 
    * @param word - English word for which to count syllables
    * @return number of syllables in given word
    */
-  public int getSyllables() {
+  public int calcSyllables() {
     if (word == null) {
       return 0;
     }
 
-    int syllables = 0;
-    
-    // SPLIT AND LINKED LIST METHOD
     String[] strSplit = word.split("(?<=a)|(?<=e)|(?<=i)|(?<=o)|(?<=u)|(?<=y)");
     LinkedList<String> sylList = new LinkedList<String>();
     for (int i = 0; i < strSplit.length; i++) {
       sylList.add(strSplit[i]);
     }
-    
-    System.out.println(sylList.toString());
-    
-    
-    for (int i = 0; i < length; i++) { // Iteratively check for vowels
 
-      // Word must be formatted to be all lowercase
-      if (vowels.contains(word.charAt(i))) {
-        syllables++;
-
-        if (i == length - 1 && word.charAt(i) == 'e') { // Discount silent 'e'
-          syllables--;
-        } else if (i != 0 && vowels.contains(word.charAt(i - 1))) { // Discount dipthongs &
-                                                                    // tripthongs
-          syllables--;
-        } else if (i != 0 && (word.charAt(i - 1) == word.charAt(i))) { // Discount double vowels
-                                                                       // 'ee'/'oo'
-          syllables--;
+    /* Coalesce dipthongs, tripthongs, and double vowels */
+    for (int i = 0; i < sylList.size(); i++) {
+      if (sylList.get(i).length() == 1 && i != 0) {
+        String vowel = sylList.get(i);
+        String prevSyl = sylList.get(i - 1);
+        if (!(vowel.equals("a") && prevSyl.endsWith("i") && !word.endsWith("ia"))) {
+          sylList.set(i - 1, prevSyl.concat(vowel));
+          sylList.remove(vowel);
+          i--;
         }
       }
     }
 
-    /* IRREGULARITIES */
-
-    // If the word begins with a prefix, i.e. "co", "re",
-    // count the prefix as a syllable only if the succeeding letter is a vowel
-    if ((word.startsWith("co") || word.startsWith("re")) && vowels.contains(word.charAt(2))) {
-      syllables++;
-    }
-
-    // Add a syllable if the word ends with 'le' and the letter before is a consonant
-    if (word.endsWith("le") && !vowels.contains(word.charAt(length - 3))) {
-      syllables++;
-    }
-
-    /**
-     * Count 'y' as a syllable only on conditions:
-     * 1. The word has no other vowel
-     * 2. 'y' is at the end of a word or syllable
-     * 3. 'y' is in the middle of a syllable
-     */
-    if (syllables == 0 && word.contains("y")) {
-      syllables++;
-    } else if (word.endsWith("y")) {
-      syllables++;
-      if (vowels.contains(word.charAt(length - 2))) {
-        syllables--;
+    /* Remove silent 'e' unless word ends with "le" or "les" preceeded by a consonant */
+    String lastSyl = sylList.getLast();
+    if (lastSyl.endsWith("e") || lastSyl.endsWith("es")) {
+      if (!(lastSyl.endsWith("le") && !vowels.contains(lastSyl.charAt(lastSyl.length() - 3)))
+          && !lastSyl.endsWith("les")) {
+        String silentE = lastSyl;
+        String prevSyl = sylList.get(sylList.size() - 2);
+        sylList.set(sylList.size() - 2, prevSyl.concat(silentE));
+        sylList.remove(silentE);
+      } else if (!(lastSyl.endsWith("les") && !vowels.contains(word.charAt(length - 4)))) {
+        String silentE = lastSyl;
+        String prevSyl = sylList.get(sylList.size() - 2);
+        sylList.set(sylList.size() - 2, prevSyl.concat(silentE));
+        sylList.remove(silentE);
       }
     }
 
-    return syllables;
-  }
+    /**
+     * If the last syllable contains only consonants, append to previous syllable
+     * Exception: "ing"
+     */
+    lastSyl = sylList.getLast();
+    if (!containsVowel(lastSyl) && !containsVowel(String.valueOf(word.charAt(length - 4)))) {
+      String prevSyl = sylList.get(sylList.size() - 2);
+      String consonants = lastSyl;
+      sylList.set(sylList.size() - 2, prevSyl.concat(consonants));
+      sylList.removeLast();
+    }
 
-  public static void main(String[] args) {
-    Word apple = new Word("rendesvous");
-    System.out.print(apple.syllables);
-  }
+    /**
+     * Treat prefixes "co" and "re", succeeded by a vowel, as their own syllables
+     * Exception: single-syllable words, i.e. "coin"
+     */
+    String firstSyl = sylList.getFirst();
+    if (((firstSyl.startsWith("co") || firstSyl.startsWith("re")) && firstSyl.length() > 2)
+        && vowels.contains(firstSyl.charAt(2)) && sylList.size() != 1) {
+      String prefix = firstSyl.substring(0, 2);
+      String rest = firstSyl.substring(2, firstSyl.length());
+      sylList.add(0, prefix);
+      sylList.set(1, rest);
+    }
 
+    return sylList.size();
+  }
 
 }
