@@ -16,31 +16,41 @@ import java.util.LinkedList;
  *
  */
 public class Word {
+  
+  public static final int ASCII_Z = 0x5A; // Index of ASCII char capital 'Z'
 
   private static final ArrayList<Character> vowels = new ArrayList<Character>(Arrays.asList('a',
       'e', 'i', 'o', 'u'));
   private String word;
   private int length;
   private int syllables;
+  private boolean properNoun;
 
   public Word() {
     word = "";
     length = 0;
     syllables = 0;
+    properNoun = false;
   }
 
   public Word(String word) {
     this.word = word.toLowerCase().trim();
     this.length = word.length();
     this.syllables = calcSyllables();
+    if (word.charAt(0) <= ASCII_Z)
+      properNoun = true;
   }
-  
+
   public int getLength() {
     return length;
   }
 
   public int getSyllables() {
     return syllables;
+  }
+
+  public boolean isProperNoun() {
+    return properNoun;
   }
 
   /**
@@ -96,8 +106,8 @@ public class Word {
 
     /* Remove silent 'e' unless word ends with "le" or "les" preceeded by a consonant */
     String lastSyl = sylList.getLast();
-    if (lastSyl.endsWith("e") || lastSyl.endsWith("es")) {
-      if (!(lastSyl.endsWith("le") && !vowels.contains(lastSyl.charAt(lastSyl.length() - 3)))
+    if (sylList.size() >= 2 && (lastSyl.endsWith("e") || lastSyl.endsWith("es"))) {
+      if (!(lastSyl.endsWith("le") && !vowels.contains(word.charAt(length - 3)))
           && !lastSyl.endsWith("les")) {
         String silentE = lastSyl;
         String prevSyl = sylList.get(sylList.size() - 2);
@@ -116,11 +126,13 @@ public class Word {
      * Exception: "ing"
      */
     lastSyl = sylList.getLast();
-    if (!containsVowel(lastSyl) && !containsVowel(String.valueOf(word.charAt(length - 4)))) {
-      String prevSyl = sylList.get(sylList.size() - 2);
-      String consonants = lastSyl;
-      sylList.set(sylList.size() - 2, prevSyl.concat(consonants));
-      sylList.removeLast();
+    if (sylList.size() >= 2 && !containsVowel(lastSyl)) {
+      if (!(word.endsWith("ing") && containsVowel(String.valueOf(word.charAt(length - 4))))) {
+        String prevSyl = sylList.get(sylList.size() - 2);
+        String consonants = lastSyl;
+        sylList.set(sylList.size() - 2, prevSyl.concat(consonants));
+        sylList.removeLast();
+      }
     }
 
     /**
@@ -137,6 +149,11 @@ public class Word {
     }
 
     return sylList.size();
+  }
+  
+  @Override
+  public String toString() {
+    return word;
   }
 
 }
